@@ -4,6 +4,7 @@ import {
   Text,
   Button,
   HStack,
+  Icon,
 } from '@chakra-ui/react'
 import { RiMoonFill, RiSunFill } from 'react-icons/ri'
 import { useColorMode, useColorModeValue } from './ui/color-mode'
@@ -38,8 +39,9 @@ export default function Header() {
         onClick={toggleColorMode}
       >
         {colorMode === 'light'
-          ? <RiMoonFill size={20} />
-          : <RiSunFill size={20} />}
+          ? <Icon as={RiMoonFill} size="md" data-testid="icon-moon" />
+          : <Icon as={RiSunFill} size="md" data-testid="icon-sun" />
+        }
       </Button>
     </HStack>
   )

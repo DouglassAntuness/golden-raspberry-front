@@ -33,7 +33,7 @@ export default function Sidebar() {
           _hover={{ textDecoration: 'none', color: 'blue.600' }}
         >
           <Flex align="center" gap={4}>
-            <Icon as={FiHome} boxSize={4} />
+            <Icon as={FiHome} boxSize={4} data-testid="icon-moon" />
             <Text fontWeight="medium" fontSize="sm">Dashboard</Text>
           </Flex>
         </Link>
@@ -44,7 +44,7 @@ export default function Sidebar() {
           _hover={{ textDecoration: 'none', color: 'blue.600' }}
         >
           <Flex align="center" gap={4}>
-            <Icon as={FiFilm} boxSize={4} />
+            <Icon as={FiFilm} boxSize={4} data-testid="icon-moon" />
             <Text fontWeight="medium" fontSize="sm">List Movies</Text>
           </Flex>
         </Link>

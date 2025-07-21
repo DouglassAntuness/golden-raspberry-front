@@ -61,7 +61,7 @@ export default function WinnersByYearTable() {
           onKeyUp={(e) => {e.key === 'Enter' && handleSearch()}}
         />
         <Button onClick={handleSearch}>
-          <Icon as={FaSearch} />
+          <Icon as={FaSearch} data-testid="icon-moon" />
         </Button>
       </HStack>
 

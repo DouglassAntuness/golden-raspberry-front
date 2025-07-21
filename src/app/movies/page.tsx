@@ -161,7 +161,7 @@ export default function MoviesPage() {
               aria-label="Previous"
               onClick={() => setPage((p) => p - 1)}
               disabled={page === 1}>
-              <Icon as={FaAngleLeft} />
+              <Icon as={FaAngleLeft} data-testid="icon-moon"/>
             </Button>
             <Text fontSize="xs">
               Page {page} of {totalPages}
@@ -171,7 +171,7 @@ export default function MoviesPage() {
               aria-label="Next"
               onClick={() => setPage((p) => p + 1)}
               disabled={page === totalPages}>
-              <Icon as={FaAngleRight} />
+              <Icon as={FaAngleRight} data-testid="icon-moon"/>
             </Button>
           </HStack>
         </VStack>

@@ -14,6 +14,7 @@ Aplicação frontend construída com **React**, **Next.js**, **Chakra UI** e **T
   - Produtores com maiores e menores intervalos entre vitórias.
   - Vencedores por ano.
 - Integração direta com a API para exibição dinâmica dos dados.
+- **Testes automatizados com Jest**
 
 ---
 
@@ -22,6 +23,7 @@ Aplicação frontend construída com **React**, **Next.js**, **Chakra UI** e **T
 - Next.js – Framework React para aplicações web modernas
 - Chakra UI – Biblioteca de componentes acessível e personalizável
 - TypeScript – Superset do JavaScript com tipagem estática
+- Jest – Testes automatizados
 - UI/UX Design – Padrões de usabilidade aplicados com foco em experiência do usuário
 
 ---
@@ -61,4 +63,11 @@ npm run dev
 4. Acesse:
 ```bash
 http://localhost:3000
+```
+
+5. Como rodar os testes:
+```bash
+yarn test
+# ou
+npm run test
 ```
