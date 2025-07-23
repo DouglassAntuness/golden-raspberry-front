@@ -11,15 +11,37 @@ type Studio = {
 };
 
 export default function TopStudiosTable() {
-  const [data, setData] = useState<Studio[]>([]);
+  // Cor do texto adaptada ao modo claro/escuro
   const color = useColorModeValue('gray.800', 'gray.100');
 
+  // Estado para armazenar os estúdios com contagem de vitórias
+  const [data, setData] = useState<Studio[]>([]);
+
+  // Carrega os dados na montagem do componente
   useEffect(() => {
-    fetch('http://localhost:8000/filme/top-studios')
-      .then((res) => res.json())
-      .then((data) => setData(data));
+    fetchStudiosWithWinCount();
   }, []);
 
+  // Função para buscar dados da API
+  const fetchStudiosWithWinCount = async () => {
+    try {
+      const res = await fetch('https://challenge.outsera.tech/api/movies/studiosWithWinCount');
+
+      if (!res.ok) {
+        throw new Error(`Erro ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      // Pegando apenas os 3 primeiros estúdios
+      setData(data.studios.slice(0, 3));
+
+    } catch (error) {
+      alert("Não foi possível carregar os estúdios com contagem de vitórias. Tente novamente mais tarde.");
+      console.error("Erro ao carregar dados da API /studiosWithWinCount:", error);
+    }
+  };
+
+  // Função para renderizar a tabela
   const renderTable = (items: Studio[]) => (
     <Table.ScrollArea borderWidth="1px" rounded="md">
       <Table.Root size="sm" stickyHeader>

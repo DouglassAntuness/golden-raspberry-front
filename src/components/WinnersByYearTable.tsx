@@ -13,18 +13,35 @@ interface Winner {
 }
 
 export default function WinnersByYearTable() {
-  const [year, setYear] = useState('');
-  const [data, setData] = useState<Winner[]>([]);
+  // Cor do texto adaptada ao modo claro/escuro
   const color = useColorModeValue('gray.800', 'gray.100');
 
-  const handleSearch = () => {
-    fetch(`http://localhost:8000/filme/winners/${year}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-      });
+  // Estado para armazenar o ano de pesquisa
+  const [year, setYear] = useState('');
+
+  // Estado para armazenar os vencedores por ano
+  const [data, setData] = useState<Winner[]>([]);
+
+  // Função para buscar dados da API
+  const fetchWinnersByYear = async () => {
+    try {
+      const res = await fetch(`https://challenge.outsera.tech/api/movies/winnersByYear?year=${year}`);
+
+      if (!res.ok) {
+        throw new Error(`Erro ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      // Pegando apenas os 3 primeiros estúdios
+      setData(data);
+
+    } catch (error) {
+      alert("Não foi possível carregar os vencedores por ano. Tente novamente mais tarde.");
+      console.error("Erro ao carregar dados da API /winnersByYear:", error);
+    }
   };
 
+  // Função para renderizar a tabela
   const renderTable = (items: Winner[]) => (
     <Table.ScrollArea borderWidth="1px" rounded="md">
       <Table.Root size="sm" stickyHeader>
@@ -58,9 +75,9 @@ export default function WinnersByYearTable() {
           value={year}
           color={color}
           onChange={(e) => setYear(e.target.value)}
-          onKeyUp={(e) => {e.key === 'Enter' && handleSearch()}}
+          onKeyUp={(e) => { e.key === 'Enter' && fetchWinnersByYear() }}
         />
-        <Button onClick={handleSearch}>
+        <Button onClick={fetchWinnersByYear}>
           <Icon as={FaSearch} data-testid="icon-moon" />
         </Button>
       </HStack>

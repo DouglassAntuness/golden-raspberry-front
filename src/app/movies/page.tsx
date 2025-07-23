@@ -7,20 +7,16 @@ import Text from '@/components/ui/text'
 import {
   Table,
   Input,
-  Select,
   Button,
   HStack,
   VStack,
-  Box,
-  IconButton,
-  Flex,
-  Icon,
-  createListCollection,
-  Portal,
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { FaAngleLeft, FaAngleRight } from 'react-icons/fa'
+  Box, Flex
+} from "@chakra-ui/react"
+import { useEffect, useState } from "react"
+import { Select } from '@/components/Select'
+import { Pagination } from '@/components/Pagination'
 
+// Interface para o modelo de dados do filme
 interface Movie {
   id: number;
   year: number;
@@ -28,49 +24,72 @@ interface Movie {
   winner: boolean;
 }
 
+// Opções do filtro
+const listWinner = [
+  { label: "yes", value: "true" },
+  { label: "no", value: "false" },
+];
+
+const pageSizes = [
+  { label: '10', value: '10' },
+  { label: '20', value: '20' },
+  { label: '50', value: '50' },
+  { label: '100', value: '100' },
+];
 
 export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState<string[]>(['10']);
   const [year, setYear] = useState("");
-  const [title, setTitle] = useState("");
   const [winner, setWinner] = useState<string[]>([]);
 
-  const listWinner = createListCollection({
-    items: [
-      { label: "yes", value: "yes" },
-      { label: "no", value: "no" },
-    ],
-  })
-
-
+  // Cores dinâmicas conforme tema (claro/escuro)
   const color = useColorModeValue('gray.800', 'gray.100');
   const bg = useColorModeValue('gray.50', 'gray.900') // claro / escuro
 
+  // Função que busca os filmes da API
   const fetchMovies = async () => {
-    const query: Record<string, string> = { page: page.toString() };
+    try {
+      const query: Record<string, string> = { page: page.toString() };
 
-    if (year) query.year = year;
-    if (title) query.title = title;
-    if (winner && winner[0]) query.winner = winner[0];
+      query.size = pageSize[0] || '10';
+      if (year) query.year = year;
+      if (winner && winner[0]) query.winner = winner[0];
 
-    const params = new URLSearchParams(query);
+      const params = new URLSearchParams(query);
 
-    const res = await fetch(`http://localhost:8000/filme?${params.toString()}`);
+      // Chamada à API com filtro 
+      const res = await fetch(`https://challenge.outsera.tech/api/movies?${params.toString()}`);
 
-    const data = await res.json();
-    setMovies(data.data);
-    setTotalPages(data.pageCount || 1);
+      if (!res.ok) {
+        throw new Error(`Erro ao buscar filmes: ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      setMovies(data.content);
+      setTotalPages(data.totalPages || 1);
+
+    } catch (error) {
+      alert("Erro ao carregar filmes");
+      console.error("Erro ao carregar filmes:", error);
+    }
   };
 
+  // Refaz a busca ao alterar o tamanho da página
+  useEffect(() => {
+    handleUpdateTable();
+  }, [pageSize]);
 
+  // Refaz a busca ao alterar a página
   useEffect(() => {
     fetchMovies();
   }, [page]);
 
-  const handleSearch = () => {
-    setPage(1);
+  // Atualiza a tabela voltando para página 0
+  const handleUpdateTable = () => {
+    setPage(0);
     fetchMovies();
   };
 
@@ -86,53 +105,60 @@ export default function MoviesPage() {
             List Movies
           </Text>
 
-          <HStack gap={2}>
-            <Input
-              color={color}
-              placeholder="Filter by year"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-            />
-            <Input
-              color={color}
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+          {/* Filtros */}
+          <HStack justifyContent="space-between" alignItems="center" w="100%">
+            <HStack gap={2} alignItems="center">
+              {/* Filtro por ano */}
+              <Input
+                minW={120}
+                color={color}
+                placeholder="Filter by year"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              />
 
-            <Select.Root
-              collection={listWinner}
-              value={winner}
-              onValueChange={(e) => setWinner(e.value)}
+              {/* Filtro por vencedor */}
+              <Box minW={150}>
+                <Select
+                  value={winner}
+                  onChange={setWinner}
+                  placeholder="Select Winner"
+                  options={listWinner}
+                  clearable={true}
+                />
+              </Box>
+
+              <Button onClick={handleUpdateTable}>Search</Button>
+            </HStack>
+
+            {/* Info + page size */}
+            <HStack
+              flexWrap="wrap"
+              gap="$4"
+              alignItems="center"
+              justifyContent="flex-end"
+              w="100%"
             >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger>
-                  <Select.ValueText placeholder="Select Winner" color={color} />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.ClearTrigger />
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {listWinner.items.map((winner) => (
-                      <Select.Item item={winner} key={winner.value} color={color}>
-                        {winner.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
+              {/* Tamanho por página */}
+              <HStack alignItems="center" flexWrap="wrap" gap="$2">
+                <Text fontSize="sm" color={color}>
+                  Results per page
+                </Text>
 
-            <Button onClick={handleSearch}>Search</Button>
+                <Box minW={70} ml={2}>
+                  <Select
+                    value={pageSize}
+                    onChange={setPageSize}
+                    placeholder="size"
+                    options={pageSizes}
+                  />
+                </Box>
+              </HStack>
+            </HStack>
           </HStack>
 
-          <Table.ScrollArea borderWidth="1px" rounded="md" w="100%">
+          {/* Tabela de filmes com scroll */}
+          <Table.ScrollArea borderWidth="1px" rounded="md" w="100%" maxHeight="450px">
             <Table.Root size="sm" stickyHeader>
               <Table.Header>
                 <Table.Row bg="bg.muted">
@@ -144,7 +170,7 @@ export default function MoviesPage() {
               </Table.Header>
               <Table.Body>
                 {movies.map((movie, idx) => (
-                  <Table.Row key={idx}>
+                  <Table.Row key={movie.id}>
                     <Table.Cell color={color}>{movie.id}</Table.Cell>
                     <Table.Cell color={color}>{movie.year}</Table.Cell>
                     <Table.Cell color={color}>{movie.title}</Table.Cell>
@@ -155,27 +181,10 @@ export default function MoviesPage() {
             </Table.Root>
           </Table.ScrollArea>
 
-          <HStack gap={2} justifyContent="center" alignSelf="flex-end">
-            <Button
-              size="xs"
-              aria-label="Previous"
-              onClick={() => setPage((p) => p - 1)}
-              disabled={page === 1}>
-              <Icon as={FaAngleLeft} data-testid="icon-moon"/>
-            </Button>
-            <Text fontSize="xs">
-              Page {page} of {totalPages}
-            </Text>
-            <Button
-              size="xs"
-              aria-label="Next"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page === totalPages}>
-              <Icon as={FaAngleRight} data-testid="icon-moon"/>
-            </Button>
-          </HStack>
+          {/* Paginação */}
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </VStack>
-      </VStack >
-    </Flex >
+      </VStack>
+    </Flex>
   )
 }

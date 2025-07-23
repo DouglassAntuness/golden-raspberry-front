@@ -6,19 +6,40 @@ import Heading from "./ui/heading";
 
 interface YearWinner {
   year: number;
-  winCount: number;
+  winnerCount: number;
 }
 
 export default function MultipleWinnersTable() {
+  // Cor do texto adaptada ao modo claro/escuro
   const color = useColorModeValue('gray.800', 'gray.100');
+
+  // Estado para armazenar os anos com múltiplos vencedores
   const [data, setData] = useState<YearWinner[]>([]);
 
+   // Carrega os dados na montagem do componente
   useEffect(() => {
-    fetch("http://localhost:8000/filme/years-with-multiple-winners")
-      .then((res) => res.json())
-      .then((json) => { setData(json) });
+    fetchYearsWithMultipleWinners();
   }, []);
 
+  // Função para buscar dados da API
+  const fetchYearsWithMultipleWinners = async () => {
+    try {
+      const res = await fetch(`https://challenge.outsera.tech/api/movies/yearsWithMultipleWinners`);
+
+      if (!res.ok) {
+        throw new Error(`Erro ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      setData(data.years);
+
+    } catch (error) {
+      alert("Não foi possível carregar os anos com múltiplos vencedores. Tente novamente mais tarde.");
+      console.error("Erro ao carregar dados da API /yearsWithMultipleWinners:", error);
+    }
+  };
+
+  // Função para renderizar a tabela
   const renderTable = (items: YearWinner[]) => (
     <Table.ScrollArea borderWidth="1px" rounded="md">
       <Table.Root size="sm" stickyHeader>
@@ -32,7 +53,7 @@ export default function MultipleWinnersTable() {
           {items.map((item, idx) => (
             <Table.Row key={idx}>
               <Table.Cell color={color}>{item.year}</Table.Cell>
-              <Table.Cell color={color}>{item.winCount}</Table.Cell>
+              <Table.Cell color={color}>{item.winnerCount}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>

@@ -22,17 +22,37 @@ type IntervalData = {
 };
 
 export default function ProducerIntervalTable() {
+  // Cor do texto adaptada ao modo claro/escuro
   const color = useColorModeValue('gray.800', 'gray.100');
+
+  // Estado para armazenar os dados dos intervalos
   const [data, setData] = useState<IntervalData>({ min: [], max: [] });
 
+  // Carrega os dados na montagem do componente
   useEffect(() => {
-    fetch("http://localhost:8000/filme/intervals")
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json);
-      });
+    fetchMaxMinWinIntervalForProducers();
   }, []);
 
+  // Função para buscar dados da API
+  const fetchMaxMinWinIntervalForProducers = async () => {
+    try {
+      const res = await fetch('https://challenge.outsera.tech/api/movies/maxMinWinIntervalForProducers');
+
+      if (!res.ok) {
+        throw new Error(`Erro ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      // Pegando apenas os 3 primeiros estúdios
+      setData(data);
+
+    } catch (error) {
+      alert("Não foi possível carregar os produtores com maior e menor intervalo de vitórias. Tente novamente mais tarde.");
+      console.error("Erro ao carregar dados da API /maxMinWinIntervalForProducers:", error);
+    }
+  };
+
+  // Função para renderizar a tabela
   const renderTable = (items: ProducerInterval[]) => (
     <Table.ScrollArea borderWidth="1px" rounded="md">
       <Table.Root size="sm" stickyHeader>
