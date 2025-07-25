@@ -1,14 +1,19 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { Provider as ChakraProvider } from "@/components/ui/provider"
-import TopStudiosTable from '@/components/TopStudiosTable'
+import { render, screen, waitFor } from '@testing-library/react';
+import { Provider as ChakraProvider } from "@/components/ui/provider";
+import TopStudiosTable from '@/components/TopStudiosTable';
+import { getStudiosWithWinCount } from '@/lib/api/movies';
 
-// Helper para renderizar com Chakra UI
+// Mock da função da camada de API
+jest.mock('@/lib/api/movies', () => ({
+  getStudiosWithWinCount: jest.fn(),
+}));
+
 function renderWithChakra(ui: React.ReactElement) {
   return render(
     <ChakraProvider>
       {ui}
     </ChakraProvider>
-  )
+  );
 }
 
 describe('TopStudiosTable', () => {
@@ -16,37 +21,32 @@ describe('TopStudiosTable', () => {
     { name: 'Studio A', winCount: 5 },
     { name: 'Studio B', winCount: 3 },
     { name: 'Studio C', winCount: 2 },
-  ]
+  ];
 
   beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockStudios),
-      })
-    ) as jest.Mock
-  })
+    (getStudiosWithWinCount as jest.Mock).mockResolvedValue(mockStudios);
+  });
 
   afterEach(() => {
-    jest.restoreAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   it('renderiza o título corretamente', async () => {
-    renderWithChakra(<TopStudiosTable />)
+    renderWithChakra(<TopStudiosTable />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Top 3 studios with winners/i)).toBeInTheDocument()
-    })
-  })
-
+      expect(screen.getByText(/Top 3 studios with winners/i)).toBeInTheDocument();
+    });
+  });
 
   it('renderiza os dados da tabela após o fetch', async () => {
-    renderWithChakra(<TopStudiosTable />)
+    renderWithChakra(<TopStudiosTable />);
 
     await waitFor(() => {
       mockStudios.forEach(studio => {
-        expect(screen.getByText(studio.name)).toBeInTheDocument()
-        expect(screen.getByText(String(studio.winCount))).toBeInTheDocument()
-      })
-    })
-  })
-})
+        expect(screen.getByText(studio.name)).toBeInTheDocument();
+        expect(screen.getByText(String(studio.winCount))).toBeInTheDocument();
+      });
+    });
+  });
+});

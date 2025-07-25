@@ -8,18 +8,7 @@ import {
 import Text from "./ui/text";
 import Heading from "./ui/heading";
 import { useColorModeValue } from "./ui/color-mode";
-
-type ProducerInterval = {
-  producer: string;
-  interval: number;
-  previousWin: number;
-  followingWin: number;
-};
-
-type IntervalData = {
-  min: ProducerInterval[];
-  max: ProducerInterval[];
-};
+import { getMaxMinWinIntervalForProducers, type IntervalData, type ProducerInterval } from "@/lib/api/movies";
 
 export default function ProducerIntervalTable() {
   // Cor do texto adaptada ao modo claro/escuro
@@ -30,22 +19,13 @@ export default function ProducerIntervalTable() {
 
   // Carrega os dados na montagem do componente
   useEffect(() => {
-    fetchMaxMinWinIntervalForProducers();
+    fetchData();
   }, []);
 
-  // Função para buscar dados da API
-  const fetchMaxMinWinIntervalForProducers = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('https://challenge.outsera.tech/api/movies/maxMinWinIntervalForProducers');
-
-      if (!res.ok) {
-        throw new Error(`Erro ${res.status} - ${res.statusText}`);
-      }
-
-      const data = await res.json();
-      // Pegando apenas os 3 primeiros estúdios
-      setData(data);
-
+      const response = await getMaxMinWinIntervalForProducers();
+      setData(response);
     } catch (error) {
       alert("Não foi possível carregar os produtores com maior e menor intervalo de vitórias. Tente novamente mais tarde.");
       console.error("Erro ao carregar dados da API /maxMinWinIntervalForProducers:", error);

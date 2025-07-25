@@ -5,12 +5,7 @@ import { useState } from 'react';
 import Heading from './ui/heading';
 import { useColorModeValue } from './ui/color-mode';
 import { FaSearch } from 'react-icons/fa';
-
-interface Winner {
-  id: number;
-  year: number;
-  title: string;
-}
+import { getWinnersByYear, type Winner } from '@/lib/api/movies';
 
 export default function WinnersByYearTable() {
   // Cor do texto adaptada ao modo claro/escuro
@@ -22,19 +17,10 @@ export default function WinnersByYearTable() {
   // Estado para armazenar os vencedores por ano
   const [data, setData] = useState<Winner[]>([]);
 
-  // Função para buscar dados da API
   const fetchWinnersByYear = async () => {
     try {
-      const res = await fetch(`https://challenge.outsera.tech/api/movies/winnersByYear?year=${year}`);
-
-      if (!res.ok) {
-        throw new Error(`Erro ${res.status} - ${res.statusText}`);
-      }
-
-      const data = await res.json();
-      // Pegando apenas os 3 primeiros estúdios
-      setData(data);
-
+      const winners = await getWinnersByYear(year);
+      setData(winners);
     } catch (error) {
       alert("Não foi possível carregar os vencedores por ano. Tente novamente mais tarde.");
       console.error("Erro ao carregar dados da API /winnersByYear:", error);

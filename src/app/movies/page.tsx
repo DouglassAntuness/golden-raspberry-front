@@ -15,14 +15,7 @@ import {
 import { useEffect, useState } from "react"
 import { Select } from '@/components/Select'
 import { Pagination } from '@/components/Pagination'
-
-// Interface para o modelo de dados do filme
-interface Movie {
-  id: number;
-  year: number;
-  title: string;
-  winner: boolean;
-}
+import { getMovies, type Movie } from '@/lib/api/movies'
 
 // Opções do filtro
 const listWinner = [
@@ -49,28 +42,17 @@ export default function MoviesPage() {
   const color = useColorModeValue('gray.800', 'gray.100');
   const bg = useColorModeValue('gray.50', 'gray.900') // claro / escuro
 
-  // Função que busca os filmes da API
   const fetchMovies = async () => {
     try {
-      const query: Record<string, string> = { page: page.toString() };
+      const data = await getMovies({
+        page,
+        size: pageSize[0],
+        year,
+        winner: winner[0],
+      });
 
-      query.size = pageSize[0] || '10';
-      if (year) query.year = year;
-      if (winner && winner[0]) query.winner = winner[0];
-
-      const params = new URLSearchParams(query);
-
-      // Chamada à API com filtro 
-      const res = await fetch(`https://challenge.outsera.tech/api/movies?${params.toString()}`);
-
-      if (!res.ok) {
-        throw new Error(`Erro ao buscar filmes: ${res.status} - ${res.statusText}`);
-      }
-
-      const data = await res.json();
       setMovies(data.content);
       setTotalPages(data.totalPages || 1);
-
     } catch (error) {
       alert("Erro ao carregar filmes");
       console.error("Erro ao carregar filmes:", error);

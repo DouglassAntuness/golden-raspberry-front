@@ -4,11 +4,7 @@ import { Table, Box } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useColorModeValue } from './ui/color-mode';
 import Heading from './ui/heading';
-
-type Studio = {
-  name: string;
-  winCount: number;
-};
+import { getStudiosWithWinCount, type Studio } from '@/lib/api/movies';
 
 export default function TopStudiosTable() {
   // Cor do texto adaptada ao modo claro/escuro
@@ -19,22 +15,13 @@ export default function TopStudiosTable() {
 
   // Carrega os dados na montagem do componente
   useEffect(() => {
-    fetchStudiosWithWinCount();
+    fetchData();
   }, []);
 
-  // Função para buscar dados da API
-  const fetchStudiosWithWinCount = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('https://challenge.outsera.tech/api/movies/studiosWithWinCount');
-
-      if (!res.ok) {
-        throw new Error(`Erro ${res.status} - ${res.statusText}`);
-      }
-
-      const data = await res.json();
-      // Pegando apenas os 3 primeiros estúdios
-      setData(data.studios.slice(0, 3));
-
+      const studios = await getStudiosWithWinCount();
+      setData(studios);
     } catch (error) {
       alert("Não foi possível carregar os estúdios com contagem de vitórias. Tente novamente mais tarde.");
       console.error("Erro ao carregar dados da API /studiosWithWinCount:", error);

@@ -3,11 +3,7 @@ import { Box, Table } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useColorModeValue } from "./ui/color-mode";
 import Heading from "./ui/heading";
-
-interface YearWinner {
-  year: number;
-  winnerCount: number;
-}
+import { getYearsWithMultipleWinners, type YearWinner } from "@/lib/api/movies";
 
 export default function MultipleWinnersTable() {
   // Cor do texto adaptada ao modo claro/escuro
@@ -16,23 +12,15 @@ export default function MultipleWinnersTable() {
   // Estado para armazenar os anos com múltiplos vencedores
   const [data, setData] = useState<YearWinner[]>([]);
 
-   // Carrega os dados na montagem do componente
+  // Carrega os dados na montagem do componente
   useEffect(() => {
-    fetchYearsWithMultipleWinners();
+    fetchData();
   }, []);
 
-  // Função para buscar dados da API
-  const fetchYearsWithMultipleWinners = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(`https://challenge.outsera.tech/api/movies/yearsWithMultipleWinners`);
-
-      if (!res.ok) {
-        throw new Error(`Erro ${res.status} - ${res.statusText}`);
-      }
-
-      const data = await res.json();
-      setData(data.years);
-
+      const years = await getYearsWithMultipleWinners();
+      setData(years);
     } catch (error) {
       alert("Não foi possível carregar os anos com múltiplos vencedores. Tente novamente mais tarde.");
       console.error("Erro ao carregar dados da API /yearsWithMultipleWinners:", error);
